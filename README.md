@@ -1,6 +1,6 @@
 # Spark Cluster using Docker
 
-This readme will guide you through the creation and setup of a 3 node spark cluster using Docker containers, share the same data volume to use as the script source and how to run a script using spark-submit.
+This readme will guide you through the creation and setup of a 3 node spark cluster using Docker containers, share the same data volume to use as the script source, how to run a script using spark-submit and how to create a container to schedule spark jobs.
 
 ###Install docker
 
@@ -74,4 +74,41 @@ words.saveAsTextFile("/data/test2.txt")
 ####Run the spark-submit container
 ```
 docker run --rm -it --link master:master --volumes-from spark-datastore brunocf/spark-submit spark-submit --master spark://172.17.0.2:7077 /data/script.py
+```
+
+###Schedule a Spark job
+
+In order to schedule a spark job, we'll still use the same shared data volume to store the spark python script, the crontab file where we first add all the cron schedule and the script called by the cron where we set the environment variables since cron jobs does not have all the environment preset when run.
+
+The spark-cron job runs a simple script that copies all the crontab file scheduled jobs to the /etc/cron.d directory where the cron service actually gets the schedule to run and start the cron service in foreground mode so the container does not exit.
+* Ensure this script is added to your shared data volume (in this case /data).
+
+####start.sh script
+```
+cp /data/crontab /etc/cron.d/spark-cron
+cron -f
+```
+
+Now let's create the main_spark.sh script that should be called by the cron service.
+Here all the environment variables required to run spark-submit are set and the spark job called.
+
+####main_spark.sh script
+```
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+export SPARK_HOME=/home/spark/spark-1.6.2-bin-hadoop2.6
+export PYSPARK_PYTHON=python2.7
+export PATH=$PATH:$SPARK_HOME/bin
+spark-submit --master spark://172.17.0.2:7077 /data/script.py
+```
+
+####Add the schedule entry to the crontab file
+
+Add the script call entry to the crontab file specifying the time you want it to run. In this example the script is scheduled to run everyday at 23:50.
+```
+50 23 * * * root sh /data/main_spark.sh
+```
+
+####Run the spark-cron docker container
+```
+docker run  -d --link master:master --volumes-from spark-datastore brunocf/spark-cron
 ```
