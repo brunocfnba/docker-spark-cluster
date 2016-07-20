@@ -64,6 +64,8 @@ Follow the simple python code in case you don't want to create your own.
 This script simply read data from a file that you should create in the same directory and add some lines to it and generates a new directory with its copy.
 
 ```
+from pyspark import SparkContext, SparkConf
+
 conf = SparkConf().setAppName("myTestApp")
 sc = SparkContext(conf=conf)
 
