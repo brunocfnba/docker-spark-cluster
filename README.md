@@ -114,3 +114,35 @@ Add the script call entry to the crontab file specifying the time you want it to
 ```
 docker run  -d --link master:master --volumes-from spark-datastore brunocf/spark-cron
 ```
+
+#Set up the Spark Cluster in Docker using Bluemix
+
+Bluemix offers Docker containers so you don't have to use your own infrastructure
+I'll walk you through the container creation within Bluemix which slightly differ from the normal one we did previoously.
+
+###Create Bluemix account and install the required software in your machine to handle docker container
+
+First go to [www.bluemix.net](http://www.bluemix.net) and follow the steps presented there to create your account.
+
+Now access the [Install IBM Plug-in to work with Docker](https://console.ng.bluemix.net/docs/containers/container_cli_cfic.html) link and follow all the instructions in order to have your local environment ready.
+
+###Create the directories and Dockerfiles
+
+Create the same directories for each one of the images as mentioned above and save each Dockerfile within their respective directory (make sure the Dockerfile file name starts with capital D and has no extensions).
+
+###Build the images in Bluemix
+
+Go to the spark-master directory and build its image directly in Bluemix. From now on all the docker commands will be "changed" to `cf ic` command that performs the same actions as docker command but in the Bluemix environment.
+
+Build the image (remember to use your our bluemix registry you created at the beginning intead of brunocf_containers)
+```
+cf ic build -t brunocf_containers/spark-datastore .
+```
+This will start the building and pushing process and when it finishes your should be able to view the image in Bluemix or via console (within your container images area) or by command line as follows
+
+```
+cf ic images
+```
+
+Repeat the same steps for all the Dockerfiles so you have all the images created in Bluemix (you don't have to create the spark-datastore image since in Bluemix we create our volume in a different way)
+
