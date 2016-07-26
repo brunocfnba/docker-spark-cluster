@@ -115,6 +115,7 @@ Add the script call entry to the crontab file specifying the time you want it to
 docker run  -d --link master:master --volumes-from spark-datastore brunocf/spark-cron
 ```
 
+
 #Set up the Spark Cluster in Docker using Bluemix
 
 Bluemix offers Docker containers so you don't have to use your own infrastructure
@@ -146,3 +147,87 @@ cf ic images
 
 Repeat the same steps for all the Dockerfiles so you have all the images created in Bluemix (you don't have to create the spark-datastore image since in Bluemix we create our volume in a different way)
 
+###Create Bluemix shared volume
+
+In Bluemix you create volumes separetaly and then attach them to the container during its creation.
+
+For this example, I'll create one volume called "data" and then use it shared among all my containers, this is where scripts and crontab files are stored.
+
+Create the volume using the command line (you can also create it using the Bluemix graphic interface)
+```
+cf ic volume create data
+```
+To check if it was created use `cf ic volume list`.
+
+###Create and Start the containers
+
+Now it's time to actually start all your container. You can start as many spark-slave nodes as you want too.
+
+If you need detailes on how to use each one of the containers read the previous sections where all the details are described.
+
+####Starting spark-master
+```
+cf ic run -d -p 8080:8080 -p 7077:7077 --volume data:/data --name master brunocf_containers/spark-master
+```
+####Requesting and binding public IP to the container
+Since we may need to check the Spark graphic interface to check nodes and running jobs, you should add a public IP to the container so it's accessible via web browser.
+
+To do so, first list your running containers (by the time there should be only one running container).
+Command to list running containers `cf ic ps`
+
+Get the "Container ID" for your spark-master running container, you'll need that to bind the public IP.
+
+First request an IP address (if you are runnning trial, you have 2 free public IPs. And then bind it to your container using the container ID retrieved previously.
+````
+cf ic ip request
+
+cf ic ip bind <IP adress> <container ID>
+```
+
+####Create spark-slave container
+```
+cf ic run -d --link master:master --volume data:/data registry.ng.bluemix.net/brunocf_containers/spark-slave
+```
+
+####Create spark-submit container
+```
+cf ic run --link master:master --volume data:/data registry.ng.bluemix.net/brunocf_containers/spark-submit sh -c "spark-submit --master spark://master:7077 /data/script.py"
+````
+
+###Create spark-cron container
+```
+cf ic run -d --link master:master --volume data:/data registry.ng.bluemix.net/brunocf_containers/spark-cron
+```
+
+###Useful Tips
+
+* In Bluemix, if you need access a running container you could do this with the following comand: `cf ic exec -it <container ID> bash`. You'll be redirected to the bash command line within the container so you can create and manage data within your volume and change the container settings.
+* All the data added to your volume is persisted even if you stop or remove the container
+* If you need to change the container timezone in order to run cron jobs accordingly simply copy the timezone file located on `/usr/share/zoneinfo/<country>/<other options>` to `/etc/localtime`.
+Follow a Dockerfile example using the Brazil East timezone:
+```
+#Spark Cron
+FROM ubuntu
+
+RUN apt-get update && apt-get install -y \
+ wget \
+ default-jdk \
+ python2.7 \
+ vim \
+ cron \
+ scala && cd /home && mkdir spark && cd spark && \
+ wget http://ftp.unicamp.br/pub/apache/spark/spark-1.6.2/spark-1.6.2-bin-hadoop2.6.tgz && \
+ tar -xvf spark-1.6.2-bin-hadoop2.6.tgz && service cron stop && cp /usr/share/zoneinfo/Brazil/East /etc/localtime
+
+RUN service cron start
+
+
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
+ENV SPARK_HOME /home/spark/spark-1.6.2-bin-hadoop2.6
+ENV PYSPARK_PYTHON python2.7
+ENV PATH $PATH:$SPARK_HOME/bin
+
+ENTRYPOINT /data/start.sh
+```
+
+* For any other Docker on Bluemix questions and setup guides refer to [https://console.ng.bluemix.net/docs/containers/container_creating_ov.html](https://console.ng.bluemix.net/docs/containers/container_creating_ov.html)
