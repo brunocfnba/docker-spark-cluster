@@ -125,7 +125,7 @@ I'll walk you through the container creation within Bluemix which slightly diffe
 
 First go to [www.bluemix.net](http://www.bluemix.net) and follow the steps presented there to create your account.
 
-Now access the [Install IBM Plug-in to work with Docker](https://console.ng.bluemix.net/docs/containers/container_cli_cfic.html) link and follow all the instructions in order to have your local environment ready.
+Now access the [Install IBM Plug-in to work with Docker](https://console.ng.bluemix.net/docs/containers/container_cli_cfic_install.html) link and follow all the instructions in order to have your local environment ready.
 
 ### Create the directories and Dockerfiles
 
