@@ -2,6 +2,9 @@
 
 This readme will guide you through the creation and setup of a 3 node spark cluster using Docker containers, share the same data volume to use as the script source, how to run a script using spark-submit and how to create a container to schedule spark jobs.
 
+> By the time you clone or fork this repo this Spark version could be sunset or the official repo link have changed. If that happens go straight to the [Spark Website](http://spark.apache.org/downloads.html) and replace the repo link in the dockerfiles to the current one.
+> I'll try to keep the files up to date as well.
+
 ### Install docker
 
 Install the appropriate docker version for your operating system. Use the following link to do so.
