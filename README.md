@@ -100,7 +100,7 @@ Here all the environment variables required to run spark-submit are set and the 
 #### main_spark.sh script
 ```
 export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-export SPARK_HOME=/home/spark/spark-1.6.2-bin-hadoop2.6
+export SPARK_HOME=/home/spark/spark-2.1.1-bin-hadoop2.6
 export PYSPARK_PYTHON=python2.7
 export PATH=$PATH:$SPARK_HOME/bin
 spark-submit --master spark://172.17.0.2:7077 /data/script.py
