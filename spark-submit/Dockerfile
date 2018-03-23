@@ -1,12 +1,12 @@
 #Spark Submit Shell
-FROM ubuntu
+FROM ubuntu:16.04
 
 RUN apt-get update && apt-get install -y \
  wget \
  default-jdk \
  python2.7 \
  scala && cd /home && mkdir spark && cd spark && \
- wget http://ftp.unicamp.br/pub/apache/spark/spark-2.1.1/spark-2.1.1-bin-hadoop2.6.tgz && \
+ wget https://archive.apache.org/dist/spark/spark-2.1.1/spark-2.1.1-bin-hadoop2.6.tgz && \
  tar -xvf spark-2.1.1-bin-hadoop2.6.tgz
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
